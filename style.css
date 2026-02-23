@@ -1,0 +1,73 @@
+:root {
+    --bg-color: #1a1a1a;
+    --text-color: #e0d8c0;
+    --accent-color: #740001; /* Gryffindor red accent */
+    --panel-bg: #2a2a2a;
+}
+
+body {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 10px;
+}
+
+.screen {
+    display: none;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.screen.active {
+    display: block;
+}
+
+#title-screen {
+    text-align: center;
+    margin-top: 20vh;
+}
+
+button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 5px;
+    cursor: pointer;
+    font-family: inherit;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: #5a0000;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    background: var(--panel-bg);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.stats p {
+    margin: 5px 10px;
+    font-weight: bold;
+}
+
+.market-panel, .inventory-panel, .actions {
+    margin-top: 20px;
+    background: var(--panel-bg);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.market-item, .inventory-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #444;
+    padding: 5px 0;
+}
