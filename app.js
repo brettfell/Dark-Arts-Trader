@@ -1,4 +1,4 @@
-// Game State v1.5
+// Game State v1.6
 let state = {
     day: 1,
     maxDays: 30,
@@ -39,18 +39,18 @@ const modalTitle = document.getElementById('modal-title');
 const modalMessage = document.getElementById('modal-message');
 const modalButtons = document.getElementById('modal-buttons');
 
-// Custom Modal System (Replaces alert and confirm)
+// Custom Modal System
 function showModal(title, message, buttons = [{text: 'OK', action: null}]) {
     modalTitle.innerText = title;
     modalMessage.innerText = message;
-    modalButtons.innerHTML = ''; // Clear old buttons
+    modalButtons.innerHTML = ''; 
 
     buttons.forEach(btn => {
         const buttonEl = document.createElement('button');
         buttonEl.innerText = btn.text;
         buttonEl.onclick = () => {
-            modal.style.display = 'none'; // Hide modal when clicked
-            if (btn.action) btn.action(); // Run the action if it exists
+            modal.style.display = 'none'; 
+            if (btn.action) btn.action(); 
         };
         modalButtons.appendChild(buttonEl);
     });
@@ -61,11 +61,9 @@ function showModal(title, message, buttons = [{text: 'OK', action: null}]) {
 startBtn.addEventListener('click', () => {
     titleScreen.classList.remove('active');
     gameScreen.classList.add('active'); 
-    gameScreen.style.display = 'block'; 
     themeMusic.play().catch(e => console.log("Audio playback prevented"));
     generatePrices();
     
-    // Day 1 Event Trigger!
     if (Math.random() < 0.30) {
         triggerRandomEvents();
     }
@@ -81,7 +79,7 @@ function generatePrices() {
     }
 }
 
-// v1.5 Random Events Logic
+// Random Events Logic
 function triggerRandomEvents() {
     const eventPool = ['A', 'B', 'C', 'D', 'E', 'F', 'F', 'F', 'G', 'H', 'I'];
     const chosenEvent = eventPool[Math.floor(Math.random() * eventPool.length)];
@@ -92,14 +90,14 @@ function triggerRandomEvents() {
         case 'A': // Squib Discount
             currentPrices['Dragon Eggs'] = Math.floor(currentPrices['Dragon Eggs'] * 0.25);
             showModal("Lucky Find!", "You must be on some Felix Felicis! A squib in the alley is selling Dragon Eggs for Sickles on the Galleon!");
-            updateUI(); // Update prices behind the modal
+            updateUI(); 
             break;
 
         case 'B': // Reginald the Peddler
             const pockets = Math.floor(Math.random() * 11) + 5; 
             const cost = Math.floor(Math.random() * 251) + 150; 
             
-            showModal("Shady Deal", `Cloak peddler Reginald whispers: "Pst... want to buy a cloak with ${pockets} extra pockets for ${cost} Galleons?"`, [
+            showModal("Shady Deal", `Cloak peddler Reginald whispers: "Pst... want to buy a cloak with ${pockets} extra pockets for ${cost}g?"`, [
                 { 
                     text: "Yes", 
                     action: () => {
@@ -118,11 +116,10 @@ function triggerRandomEvents() {
             break;
 
         case 'C': // Amortentia Trap
-            // Only target items where qty > 1
             const multiItems = ownedItems.filter(item => state.inventory[item].qty > 1);
             if (multiItems.length > 0) {
                 const lostItem = multiItems[Math.floor(Math.random() * multiItems.length)];
-                const lostAmount = Math.ceil(state.inventory[lostItem].qty / 2); // Lose half
+                const lostAmount = Math.ceil(state.inventory[lostItem].qty / 2); 
                 state.inventory[lostItem].qty -= lostAmount;
                 showModal("Tricked!", `An unknown witch at the pub slipped Amortentia in your mead! Before it wore off, you gave her ${lostAmount} of your ${lostItem}.`);
                 updateUI();
@@ -134,7 +131,6 @@ function triggerRandomEvents() {
             const foundItem = midTier[Math.floor(Math.random() * midTier.length)];
             const foundQty = Math.floor(Math.random() * 5) + 2; 
             
-            // v1.5 OVER-ENCUMBERED: No space limits on finding items!
             const oldQty = state.inventory[foundItem].qty;
             const oldAvg = state.inventory[foundItem].avgCost;
             const newTotalQty = oldQty + foundQty;
@@ -152,7 +148,7 @@ function triggerRandomEvents() {
                 const lossPercent = (Math.floor(Math.random() * 11) + 10) / 100; 
                 const lostCash = Math.floor(state.wallet * lossPercent);
                 state.wallet -= lostCash;
-                showModal("Niffler!", `A stray Niffler scurried up your leg! It made off with ${lostCash} of your shiny Galleons!`);
+                showModal("Niffler!", `A stray Niffler scurried up your leg! It made off with ${lostCash}g of your shiny Galleons!`);
                 updateUI();
             }
             break;
@@ -170,24 +166,24 @@ function triggerRandomEvents() {
         case 'G': // Careless Tourist
             const foundCash = Math.floor(Math.random() * 151) + 50; 
             state.wallet += foundCash;
-            showModal("Found Galleons", `A wealthy wizard dropped their coin purse outside the Leaky Cauldron. Finders keepers! You gained ${foundCash} Galleons.`);
+            showModal("Found Galleons", `A wealthy wizard dropped their coin purse outside the Leaky Cauldron. Finders keepers! You gained ${foundCash}g.`);
             updateUI();
             break;
 
-        case 'H': // Spoiled Batch
-            if (ownedItems.length > 0) {
-                const spoiledItem = ownedItems[Math.floor(Math.random() * ownedItems.length)];
-                const spoiledQty = state.inventory[spoiledItem].qty;
-                state.inventory[spoiledItem].qty = 0;
-                state.inventory[spoiledItem].avgCost = 0;
-                showModal("Spoiled!", `Your stash of ${spoiledItem} wasn't sealed properly and went bad! You had to vanish all ${spoiledQty} of them.`);
+        case 'H': // Spoiled Batch (Ruins 75%)
+            const spoilableItems = ownedItems.filter(item => state.inventory[item].qty > 1);
+            if (spoilableItems.length > 0) {
+                const spoiledItem = spoilableItems[Math.floor(Math.random() * spoilableItems.length)];
+                const lostQty = Math.ceil(state.inventory[spoiledItem].qty * 0.75);
+                state.inventory[spoiledItem].qty -= lostQty;
+                showModal("Spoiled!", `Your stash of ${spoiledItem} wasn't sealed properly and went bad! You had to vanish ${lostQty} of them, but managed to save the rest.`);
                 updateUI();
             }
             break;
 
         case 'I': // Cheap Polyjuice
             currentPrices['Polyjuice Potion'] = 5;
-            showModal("Street Deal", `"Hey buddy, need someone to test this cheap homemade Polyjuice? 5 Galleons a vial!"`);
+            showModal("Street Deal", `"Hey buddy, need someone to test this cheap homemade Polyjuice? 5g a vial!"`);
             updateUI();
             break;
     }
@@ -195,11 +191,13 @@ function triggerRandomEvents() {
 
 function travel(newLocation) {
     if (state.day >= state.maxDays) {
-        showModal("Time's Up!", "Let's see if you survived Borgin & Burkes...");
+        endGame();
         return; 
     }
     state.currentLocation = newLocation;
     state.day++;
+    
+    // Kept 5% daily interest
     state.debt = Math.floor(state.debt * 1.05); 
     generatePrices();
     
@@ -208,6 +206,31 @@ function travel(newLocation) {
     }
     
     updateUI();
+}
+
+function endGame() {
+    const gameScreen = document.getElementById('game-screen');
+    gameScreen.classList.remove('active');
+    gameScreen.style.display = 'none';
+    
+    const endScreen = document.getElementById('end-screen');
+    const endTitle = document.getElementById('end-title');
+    const endMessage = document.getElementById('end-message');
+    const finalScore = document.getElementById('final-score');
+    
+    endScreen.classList.add('active');
+    endScreen.style.display = 'block';
+
+    if (state.debt === 0) {
+        const totalWealth = state.wallet + state.bank;
+        endTitle.innerText = "You Survived!";
+        endMessage.innerText = "You successfully paid off Borgin and kept yourself out of Azkaban. Time to lay low in the Hog's Head for a while.";
+        finalScore.innerText = `Final Score: ${totalWealth}g`;
+    } else {
+        endTitle.innerText = "Busted!";
+        endMessage.innerText = `You failed to pay off your debt. Borgin tipped off the Ministry Aurors, handing them the fake fang. You were dragged to Azkaban owing ${state.debt}g.`;
+        finalScore.innerText = "Final Score: Dementor's Kiss";
+    }
 }
 
 function buyItem(item) {
@@ -293,7 +316,6 @@ function updateUI() {
     let currentSpace = 0;
     for (let i in state.inventory) currentSpace += state.inventory[i].qty;
     
-    // Visually highlight if over-encumbered
     const invCountEl = document.getElementById('inventory-count');
     invCountEl.innerText = currentSpace;
     invCountEl.style.color = (currentSpace > state.maxSpace) ? "var(--accent-color)" : "inherit";
@@ -306,7 +328,7 @@ function updateUI() {
     
     if (state.currentLocation === 'Diagon Alley') {
         locPanel.style.display = 'block';
-        locTitle.innerText = "Gringotts Wizarding Bank";
+        locTitle.innerText = "Gringotts Vault";
         locContent.innerHTML = `
             <input type="number" id="bank-amount" min="1" placeholder="Amount">
             <button onclick="bankTransaction('deposit')">Deposit</button>
@@ -329,13 +351,12 @@ function updateUI() {
         const price = currentPrices[item];
         const maxAffordByWallet = Math.floor(state.wallet / price);
         const availablePockets = state.maxSpace - currentSpace;
-        // If available pockets is negative (over-encumbered), canAfford becomes 0
         const canAfford = Math.max(0, Math.min(maxAffordByWallet, availablePockets));
         
         const inputId = `buy-qty-${item.replace(/\s+/g, '-')}`;
         marketList.innerHTML += `
             <div class="market-item">
-                <span>${item} <br><strong>${price}G</strong> <small>(Max: ${canAfford})</small></span>
+                <span>${item} <br><strong>${price}g</strong> <small>(Max: ${canAfford})</small></span>
                 <div>
                     <input type="number" id="${inputId}" value="${canAfford > 0 ? 1 : 0}" min="1" max="${canAfford > 0 ? canAfford : 1}" style="width: 40px;">
                     <button onclick="buyItem('${item}')">Buy</button>
@@ -353,7 +374,7 @@ function updateUI() {
             const inputId = `sell-qty-${item.replace(/\s+/g, '-')}`;
             inventoryList.innerHTML += `
                 <div class="inventory-item">
-                    <span>${item} <br>(Qty: ${invItem.qty} @ ${avgCost}G avg)</span>
+                    <span>${item} <br>(Qty: ${invItem.qty} @ ${avgCost}g avg)</span>
                     <div>
                         <input type="number" id="${inputId}" value="${invItem.qty}" min="1" max="${invItem.qty}" style="width: 40px;">
                         <button onclick="sellItem('${item}')">Sell</button>
