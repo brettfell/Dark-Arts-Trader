@@ -11,17 +11,18 @@
 
     <div id="title-screen" class="screen active">
         <h1>Mundungus' Debt</h1>
-        <p>You owe Borgin & Burkes 5,000 Galleons. You have 30 days to pay it off.</p>
+        <p>You sold Borgin a painted Acromantula pincer, swearing it was a genuine Basilisk fang. When his dangerous client discovered the fake, Borgin had to pay 5,000g to save his own skin.</p>
+        <p>Now, Borgin is holding the forged fang. If you don't pay off the debt in 30 days, he's handing it to the Aurors as proof of you trafficking Class-A Non-Tradeable Goods—a guaranteed one-way ticket to Azkaban.</p>
         <button id="start-btn">Sneak into Knockturn Alley (Start)</button>
         <audio id="theme-music" src="theme.mp3" loop></audio> 
     </div>
 
-    <div id="game-screen" class="screen">
+    <div id="game-screen" class="screen" style="display: none;">
         <header>
             <h2>Location: <span id="current-location">Knockturn Alley</span></h2>
             <div class="stats">
                 <p>Day: <span id="day">1</span> / 30</p>
-                <p>Galleons: <span id="wallet">100</span></p>
+                <p>Galleons: <span id="wallet">100</span>g</p>
                 <p>Pockets: <span id="inventory-count">0</span> / <span id="max-space">50</span></p>
             </div>
         </header>
@@ -42,14 +43,25 @@
         </div>
 
         <div class="actions">
-            <h3>Apparate (Travel)</h3>
+            <h3>Apparate</h3>
             <div id="locations-list"></div>
         </div>
 
         <div class="financials-panel">
             <h3>Financials</h3>
-            <p>Bank (Gringotts): <span id="bank">0</span>G</p>
-            <p>Debt (Borgin & Burkes): <span id="debt">5000</span>G</p>
+            <p>Vault (Gringotts): <span id="bank">0</span>g</p>
+            <p>Debt (Borgin & Burkes): <span id="debt">5000</span>g</p>
+        </div>
+    </div>
+
+    <div id="end-screen" class="screen" style="display: none;">
+        <h1 id="end-title">Game Over</h1>
+        <div class="stats">
+            <p id="end-message" style="font-size: 1.2em; text-align: center; width: 100%;"></p>
+            <h2 id="final-score" style="text-align: center; width: 100%; color: var(--accent-color);"></h2>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="location.reload()">Play Again</button>
         </div>
     </div>
 
