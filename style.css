@@ -89,4 +89,39 @@ input[type="number"] {
     margin: 5px 0;
     font-weight: bold;
 }
+/* Custom Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Dark semi-transparent background */
+}
+
+.modal-content {
+    background-color: var(--panel-bg);
+    margin: 40% auto;
+    padding: 20px;
+    border: 2px solid var(--accent-color);
+    width: 85%;
+    max-width: 400px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    color: var(--accent-color);
+}
+
+.modal-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
 
