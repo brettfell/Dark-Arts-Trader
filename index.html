@@ -22,10 +22,16 @@
             <div class="stats">
                 <p>Day: <span id="day">1</span> / 30</p>
                 <p>Galleons: <span id="wallet">100</span></p>
+                <p>Bank: <span id="bank">0</span></p>
                 <p>Debt: <span id="debt">5000</span></p>
                 <p>Space: <span id="inventory-count">0</span> / <span id="max-space">20</span></p>
             </div>
         </header>
+
+        <div id="location-actions-panel" class="actions" style="display: none;">
+            <h3 id="location-action-title">Special Action</h3>
+            <div id="location-action-content"></div>
+        </div>
 
         <div class="market-panel">
             <h3>Market Prices</h3>
@@ -45,7 +51,6 @@
 
     <script src="app.js"></script>
     <script>
-        // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');
         }
