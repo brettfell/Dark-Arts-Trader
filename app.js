@@ -60,7 +60,11 @@ function showModal(title, message, buttons = [{text: 'OK', action: null}]) {
 
 startBtn.addEventListener('click', () => {
     titleScreen.classList.remove('active');
+    titleScreen.style.display = 'none'; // Ensures title screen hides
+    
     gameScreen.classList.add('active'); 
+    gameScreen.style.display = 'block'; // THIS IS THE FIX: Forces game screen to show
+    
     themeMusic.play().catch(e => console.log("Audio playback prevented"));
     generatePrices();
     
@@ -70,6 +74,7 @@ startBtn.addEventListener('click', () => {
     
     updateUI();
 });
+
 
 function generatePrices() {
     for (let item in items) {
