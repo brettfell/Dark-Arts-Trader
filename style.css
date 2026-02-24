@@ -78,4 +78,15 @@ input[type="number"] {
     background-color: #eee;
     margin-right: 5px;
 }
+.financials-panel {
+    margin-top: 20px;
+    background: var(--panel-bg);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.financials-panel p {
+    margin: 5px 0;
+    font-weight: bold;
+}
 
