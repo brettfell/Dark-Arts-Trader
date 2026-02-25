@@ -2,7 +2,9 @@
     --bg-color: #1a1a1a;
     --text-color: #e0d8c0;
     --accent-color: #740001; /* Gryffindor red accent */
-    --panel-bg: #2a2a2a;
+    
+    /* Changed to a semi-transparent dark grey so backgrounds show through! */
+    --panel-bg: rgba(25, 25, 25, 0.85); 
 }
 
 body {
@@ -11,7 +13,23 @@ body {
     color: var(--text-color);
     margin: 0;
     padding: 10px;
+    
+    /* Background Image Setup */
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    transition: background-image 0.5s ease-in-out; /* Smooth fade when traveling */
 }
+
+/* Dynamic Background Classes */
+body.bg-title { background-image: url('Knockturn.jpeg'); }
+body.bg-knockturn { background-image: url('Knockturn.jpeg'); }
+body.bg-diagon { background-image: url('Diagon.jpg'); }
+body.bg-hogsmeade { background-image: url('HogsHead.jpg'); }
+body.bg-forest { background-image: url('Forest.jpg'); }
+body.bg-godrics { background-image: url('GodricksHollow.jpg'); }
+body.bg-azkaban { background-image: url('Azkaban.jpg'); }
+body.bg-win { background-image: url('HogsHead.jpg'); }
 
 .screen {
     display: none;
@@ -26,30 +44,44 @@ body {
 #title-screen {
     text-align: center;
     margin-top: 15vh;
+    background: var(--panel-bg);
+    padding: 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
 }
 
 button {
     background-color: var(--accent-color);
     color: white;
-    border: none;
+    border: 1px solid #000;
     padding: 10px 15px;
     margin: 5px;
     cursor: pointer;
     font-family: inherit;
     border-radius: 4px;
+    font-weight: bold;
 }
 
 button:hover {
     background-color: #5a0000;
 }
 
+/* Glass effect for all panels */
+.stats, .market-panel, .inventory-panel, .actions, .financials-panel {
+    margin-top: 20px;
+    background: var(--panel-bg);
+    padding: 15px;
+    border-radius: 8px;
+    backdrop-filter: blur(4px); /* Creates a cool glass effect */
+    border: 1px solid #444;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+}
+
 .stats {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
-    background: var(--panel-bg);
-    padding: 10px;
-    border-radius: 5px;
+    margin-top: 0;
 }
 
 .stats p {
@@ -57,27 +89,26 @@ button:hover {
     font-weight: bold;
 }
 
-.market-panel, .inventory-panel, .actions, .financials-panel {
-    margin-top: 20px;
-    background: var(--panel-bg);
-    padding: 10px;
-    border-radius: 5px;
-}
-
 .market-item, .inventory-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #444;
-    padding: 5px 0;
+    padding: 8px 0;
+}
+
+.market-item:last-child, .inventory-item:last-child {
+    border-bottom: none;
 }
 
 input[type="number"] {
     padding: 8px;
     border: none;
     border-radius: 4px;
-    background-color: #eee;
+    background-color: #ddd;
     margin-right: 5px;
+    font-family: inherit;
+    font-weight: bold;
 }
 
 /* Custom Modal Styles */
@@ -93,7 +124,7 @@ input[type="number"] {
 }
 
 .modal-content {
-    background-color: var(--panel-bg);
+    background-color: #222;
     margin: 40% auto;
     padding: 20px;
     border: 2px solid var(--accent-color);
@@ -101,7 +132,7 @@ input[type="number"] {
     max-width: 400px;
     border-radius: 8px;
     text-align: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    box-shadow: 0 0 15px var(--accent-color);
 }
 
 .modal-content h3 {
@@ -115,4 +146,3 @@ input[type="number"] {
     justify-content: center;
     gap: 10px;
 }
-
