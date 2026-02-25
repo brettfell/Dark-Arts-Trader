@@ -3,8 +3,8 @@
     --text-color: #e0d8c0;
     --accent-color: #740001; 
     
-    /* Lowered opacity from 0.85 to 0.60 for much more transparency */
-    --panel-bg: rgba(15, 15, 15, 0.60); 
+    /* Slightly darker transparency without the blur so text remains readable */
+    --panel-bg: rgba(15, 15, 15, 0.85); 
 }
 
 body {
@@ -19,8 +19,8 @@ body {
     background-attachment: fixed;
     transition: background-image 0.5s ease-in-out; 
     
-    /* Dark shadow behind all text to stop it from washing out */
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
+    /* Stronger shadow to guarantee text pops against bright backgrounds */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
 }
 
 /* Dynamic Background Classes */
@@ -49,7 +49,8 @@ body.bg-win { background-image: url('HogsHead.jpg'); }
     background: var(--panel-bg);
     padding: 20px;
     border-radius: 10px;
-    backdrop-filter: blur(5px);
+    border: 1px solid #444;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.8);
 }
 
 button {
@@ -62,41 +63,54 @@ button {
     font-family: inherit;
     border-radius: 4px;
     font-weight: bold;
-    text-shadow: none; /* Keeps button text crisp */
+    text-shadow: none; 
 }
 
 button:hover {
     background-color: #5a0000;
 }
 
-/* Glass effect applied to header and all panels */
-header, .market-panel, .inventory-panel, .actions, .financials-panel {
-    margin-top: 15px;
+/* -- THE BOX FIX -- */
+/* Forces the Header (Title + Stats) into one unified dark box */
+header {
+    margin-top: 10px;
     background: var(--panel-bg);
     padding: 15px;
     border-radius: 8px;
-    backdrop-filter: blur(5px); 
-    border: 1px solid #444;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    border: 1px solid #555;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.8);
 }
 
-/* Formats the Location title inside the new header box */
 header h2 {
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     border-bottom: 1px solid #555;
     padding-bottom: 10px;
+    font-size: 1.4em;
 }
 
+/* Strips background from stats so it sits cleanly inside the header box */
 .stats {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
+    background: transparent;
+    padding: 0;
 }
 
 .stats p {
     margin: 5px 10px;
     font-weight: bold;
+}
+
+/* Panels */
+.market-panel, .inventory-panel, .actions, .financials-panel, #location-actions-panel {
+    margin-top: 20px;
+    background: var(--panel-bg);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #555;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.8);
 }
 
 .market-item, .inventory-item {
@@ -120,7 +134,7 @@ input[type="number"] {
     font-family: inherit;
     font-weight: bold;
     color: #000;
-    text-shadow: none; /* Keeps input numbers crisp */
+    text-shadow: none; 
 }
 
 /* Custom Modal Styles */
@@ -132,7 +146,7 @@ input[type="number"] {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgba(0, 0, 0, 0.90);
 }
 
 .modal-content {
