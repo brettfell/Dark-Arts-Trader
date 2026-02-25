@@ -1,4 +1,5 @@
-// Game State v1.8
+
+// Game State v1.9
 let state = {
     day: 1,
     maxDays: 30,
@@ -7,7 +8,7 @@ let state = {
     bank: 0,
     debt: 5000,
     wandLevel: 0, 
-    potionsAvailable: 0, // Tracks daily supply at St. Mungo's
+    potionsAvailable: 0,
     inventory: {
         'Polyjuice Potion': { qty: 0, avgCost: 0 },
         'Doxy Eggs': { qty: 0, avgCost: 0 },
@@ -47,6 +48,9 @@ const modal = document.getElementById('custom-modal');
 const modalTitle = document.getElementById('modal-title');
 const modalMessage = document.getElementById('modal-message');
 const modalButtons = document.getElementById('modal-buttons');
+
+// Set the title screen background on load
+document.body.classList.add('bg-title');
 
 function showModal(title, message, buttons = [{text: 'OK', action: null}]) {
     modalTitle.innerText = title;
@@ -89,7 +93,6 @@ function generatePrices() {
     }
 }
 
-// v1.8 Combat Logic
 function triggerCombat() {
     showModal("Ministry Ambush!", "Aurors have tracked your movements! What do you do?", [
         { text: "Fight", action: () => resolveCombat(true) },
@@ -99,7 +102,7 @@ function triggerCombat() {
 
 function resolveCombat(isFighting) {
     const wandPower = wands[state.wandLevel].power;
-    const aurorStrength = Math.floor(Math.random() * 3) + 1; // 1 to 3
+    const aurorStrength = Math.floor(Math.random() * 3) + 1; 
     let damage = 0;
 
     if (isFighting) {
@@ -110,7 +113,7 @@ function resolveCombat(isFighting) {
             }}]);
             return;
         } else {
-            damage = Math.floor(Math.random() * 30) + 20; // Take 20-50 damage
+            damage = Math.floor(Math.random() * 30) + 20; 
             state.health -= damage;
             if (state.health > 0) {
                 showModal("Outdueled!", `The Aurors overpowered you! You took ${damage} damage and barely managed to apparate away. Your health is now ${state.health}.`);
@@ -119,27 +122,25 @@ function resolveCombat(isFighting) {
             }
         }
     } else {
-        // v1.8 Fleeing Logic (Added Arrest Risk)
         const fleeRoll = Math.random();
-        if (fleeRoll < 0.40) { // 40% chance escape unharmed
+        if (fleeRoll < 0.40) { 
             showModal("Escaped!", "You quickly apparated away before they could cast a hex.");
             return;
-        } else if (fleeRoll < 0.80) { // 40% chance take light damage
-            damage = Math.floor(Math.random() * 20) + 10; // Take 10-30 damage
+        } else if (fleeRoll < 0.80) { 
+            damage = Math.floor(Math.random() * 20) + 10; 
             state.health -= damage;
             if (state.health > 0) {
                 showModal("Hit!", `You escaped, but took ${damage} damage from a stray hex. Your health is now ${state.health}.`);
                 updateUI();
                 return;
             }
-        } else { // 20% chance getting caught instantly
+        } else { 
             showModal("Caught!", "An Auror's anti-disapparation jinx caught you off guard. You couldn't escape!");
             bustPlayer();
             return;
         }
     }
 
-    // If health drops to 0 from taking damage
     if (state.health <= 0) {
         bustPlayer();
     }
@@ -255,9 +256,7 @@ function travel(newLocation) {
     state.day++;
     state.debt = Math.floor(state.debt * 1.05); 
     
-    // v1.8 Randomize available potions at Godric's Hollow each travel (0 to 4)
     state.potionsAvailable = Math.floor(Math.random() * 5); 
-    
     generatePrices();
     
     let heat = 0.05; 
@@ -286,12 +285,17 @@ function endGame() {
     endScreen.classList.add('active');
     endScreen.style.display = 'block';
 
+    // Set Background based on Win/Loss
+    document.body.className = ''; 
+
     if (state.debt === 0) {
+        document.body.classList.add('bg-win'); // Hog's Head Background
         const totalWealth = state.wallet + state.bank;
         endTitle.innerText = "You Survived!";
         endMessage.innerText = "You successfully paid off Borgin and kept yourself out of Azkaban. Time to lay low in the Hog's Head for a while.";
         finalScore.innerText = `Final Score: ${totalWealth}g`;
     } else {
+        document.body.classList.add('bg-azkaban'); // Azkaban Background
         endTitle.innerText = "Busted!";
         endMessage.innerText = `You failed to pay off your debt. Borgin tipped off the Ministry Aurors, handing them the fake fang. You were dragged to Azkaban owing ${state.debt}g.`;
         finalScore.innerText = "Final Score: Dementor's Kiss";
@@ -355,7 +359,6 @@ function payDebt() {
     updateUI();
 }
 
-// v1.8 Updated Healing Logic
 function healPlayer(amount, cost) {
     if (state.health >= 100) { 
         showModal("Healthy", "You are already at full health."); 
@@ -393,6 +396,14 @@ function upgradeWand() {
 }
 
 function updateUI() {
+    // Dynamically Swap Background based on Location
+    document.body.className = ''; 
+    if (state.currentLocation === 'Diagon Alley') document.body.classList.add('bg-diagon');
+    else if (state.currentLocation === 'Knockturn Alley') document.body.classList.add('bg-knockturn');
+    else if (state.currentLocation === 'Hogsmeade') document.body.classList.add('bg-hogsmeade');
+    else if (state.currentLocation === 'Forbidden Forest') document.body.classList.add('bg-forest');
+    else if (state.currentLocation === 'Godric\'s Hollow') document.body.classList.add('bg-godrics');
+
     document.getElementById('current-location').innerText = state.currentLocation;
     document.getElementById('day').innerText = state.day;
     document.getElementById('health').innerText = state.health;
@@ -422,13 +433,8 @@ function updateUI() {
         locContent.innerHTML = `<input type="number" id="debt-amount" min="1" placeholder="Amount"> <button onclick="payDebt()">Pay Down Debt</button>`;
     } else if (state.currentLocation === 'Godric\'s Hollow') {
         locTitle.innerText = "St. Mungo's Covert Ward";
-        
-        // v1.8 Dynamic potion availability UI
         if (state.potionsAvailable > 0) {
-            locContent.innerHTML = `
-                <p>The healer has <strong>${state.potionsAvailable}</strong> Wiggenweld Potion(s) left.</p>
-                <button onclick="healPlayer(10, 200)">Drink Potion (+10 HP / 200g)</button>
-            `;
+            locContent.innerHTML = `<p>The healer has <strong>${state.potionsAvailable}</strong> Wiggenweld Potion(s) left.</p><button onclick="healPlayer(10, 200)">Drink Potion (+10 HP / 200g)</button>`;
         } else {
             locContent.innerHTML = `<p>The healer is completely out of Wiggenweld Potions today. You'll have to apparate out and come back later.</p>`;
         }
