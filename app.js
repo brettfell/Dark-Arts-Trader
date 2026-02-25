@@ -1,4 +1,4 @@
-// Game State v1.7
+// Game State v1.8
 let state = {
     day: 1,
     maxDays: 30,
@@ -7,6 +7,7 @@ let state = {
     bank: 0,
     debt: 5000,
     wandLevel: 0, 
+    potionsAvailable: 0, // Tracks daily supply at St. Mungo's
     inventory: {
         'Polyjuice Potion': { qty: 0, avgCost: 0 },
         'Doxy Eggs': { qty: 0, avgCost: 0 },
@@ -28,7 +29,6 @@ const items = {
     'Dragon Eggs': { min: 3000, max: 6000 }
 };
 
-// Wand configurations
 const wands = [
     { name: 'None', cost: 0, power: 0 },
     { name: 'Splintered Wand', cost: 500, power: 1 },
@@ -89,7 +89,7 @@ function generatePrices() {
     }
 }
 
-// Combat Logic
+// v1.8 Combat Logic
 function triggerCombat() {
     showModal("Ministry Ambush!", "Aurors have tracked your movements! What do you do?", [
         { text: "Fight", action: () => resolveCombat(true) },
@@ -112,23 +112,36 @@ function resolveCombat(isFighting) {
         } else {
             damage = Math.floor(Math.random() * 30) + 20; // Take 20-50 damage
             state.health -= damage;
+            if (state.health > 0) {
+                showModal("Outdueled!", `The Aurors overpowered you! You took ${damage} damage and barely managed to apparate away. Your health is now ${state.health}.`);
+                updateUI();
+                return;
+            }
         }
     } else {
-        // Fleeing
-        if (Math.random() < 0.5) { // 50% chance to escape unharmed
+        // v1.8 Fleeing Logic (Added Arrest Risk)
+        const fleeRoll = Math.random();
+        if (fleeRoll < 0.40) { // 40% chance escape unharmed
             showModal("Escaped!", "You quickly apparated away before they could cast a hex.");
             return;
-        } else {
+        } else if (fleeRoll < 0.80) { // 40% chance take light damage
             damage = Math.floor(Math.random() * 20) + 10; // Take 10-30 damage
             state.health -= damage;
+            if (state.health > 0) {
+                showModal("Hit!", `You escaped, but took ${damage} damage from a stray hex. Your health is now ${state.health}.`);
+                updateUI();
+                return;
+            }
+        } else { // 20% chance getting caught instantly
+            showModal("Caught!", "An Auror's anti-disapparation jinx caught you off guard. You couldn't escape!");
+            bustPlayer();
+            return;
         }
     }
 
+    // If health drops to 0 from taking damage
     if (state.health <= 0) {
         bustPlayer();
-    } else {
-        showModal("Hit!", `You escaped, but took ${damage} damage from a stray hex. Your health is now ${state.health}.`);
-        updateUI();
     }
 }
 
@@ -138,7 +151,6 @@ function bustPlayer() {
     const lostCash = state.wallet;
     state.wallet = 0;
     
-    // Confiscate all items
     for (let item in state.inventory) {
         state.inventory[item].qty = 0;
         state.inventory[item].avgCost = 0;
@@ -152,7 +164,6 @@ function bustPlayer() {
     }
 }
 
-// Event Logic (Unchanged from v1.6)
 function triggerRandomEvents() {
     const eventPool = ['A', 'B', 'C', 'D', 'E', 'F', 'F', 'F', 'G', 'H', 'I'];
     const chosenEvent = eventPool[Math.floor(Math.random() * eventPool.length)];
@@ -243,12 +254,15 @@ function travel(newLocation) {
     state.currentLocation = newLocation;
     state.day++;
     state.debt = Math.floor(state.debt * 1.05); 
+    
+    // v1.8 Randomize available potions at Godric's Hollow each travel (0 to 4)
+    state.potionsAvailable = Math.floor(Math.random() * 5); 
+    
     generatePrices();
     
-    // Calculate Heat (Chance of Combat)
-    let heat = 0.05; // Base 5%
-    if (state.debt === 0) heat += 0.10; // Debt paid = +10% heat
-    if (state.wallet + state.bank > 20000) heat += 0.10; // Rich = +10% heat
+    let heat = 0.05; 
+    if (state.debt === 0) heat += 0.10; 
+    if (state.wallet + state.bank > 20000) heat += 0.10; 
 
     if (Math.random() < heat) {
         triggerCombat();
@@ -284,7 +298,6 @@ function endGame() {
     }
 }
 
-// Shopping Logic
 function buyItem(item) {
     const qty = parseInt(document.getElementById(`buy-qty-${item.replace(/\s+/g, '-')}`).value) || 1;
     if (qty <= 0) return;
@@ -321,7 +334,6 @@ function sellItem(item) {
     }
 }
 
-// Location Specific Actions logic
 function bankTransaction(type) {
     const amount = parseInt(document.getElementById('bank-amount').value) || 0;
     if (amount <= 0) return;
@@ -343,14 +355,25 @@ function payDebt() {
     updateUI();
 }
 
+// v1.8 Updated Healing Logic
 function healPlayer(amount, cost) {
-    if (state.health >= 100) { showModal("Healthy", "You are already at full health."); return; }
+    if (state.health >= 100) { 
+        showModal("Healthy", "You are already at full health."); 
+        return; 
+    }
+    if (state.potionsAvailable <= 0) {
+        showModal("Out of Stock", "The healer has no more potions available today.");
+        return;
+    }
     if (state.wallet >= cost) {
         state.wallet -= cost;
+        state.potionsAvailable--;
         state.health = Math.min(100, state.health + amount);
         showModal("Healed", `You drank a Wiggenweld Potion. Health restored to ${state.health}.`);
         updateUI();
-    } else { showModal("Broke", "Not enough Galleons for treatment."); }
+    } else { 
+        showModal("Broke", "Not enough Galleons for treatment. Time to sell some stash."); 
+    }
 }
 
 function upgradeWand() {
@@ -399,7 +422,16 @@ function updateUI() {
         locContent.innerHTML = `<input type="number" id="debt-amount" min="1" placeholder="Amount"> <button onclick="payDebt()">Pay Down Debt</button>`;
     } else if (state.currentLocation === 'Godric\'s Hollow') {
         locTitle.innerText = "St. Mungo's Covert Ward";
-        locContent.innerHTML = `<button onclick="healPlayer(20, 50)">Patch Up (Heal 20 HP - 50g)</button> <button onclick="healPlayer(100, 200)">Full Heal (200g)</button>`;
+        
+        // v1.8 Dynamic potion availability UI
+        if (state.potionsAvailable > 0) {
+            locContent.innerHTML = `
+                <p>The healer has <strong>${state.potionsAvailable}</strong> Wiggenweld Potion(s) left.</p>
+                <button onclick="healPlayer(10, 200)">Drink Potion (+10 HP / 200g)</button>
+            `;
+        } else {
+            locContent.innerHTML = `<p>The healer is completely out of Wiggenweld Potions today. You'll have to apparate out and come back later.</p>`;
+        }
     } else if (state.currentLocation === 'Forbidden Forest') {
         locTitle.innerText = "Shady Wandcrafter";
         const nextWand = wands[state.wandLevel + 1];
