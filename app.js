@@ -1,4 +1,4 @@
-// Game State v1.9.2
+// Game State v1.9.3
 let state = {
     day: 1,
     maxDays: 30,
@@ -144,22 +144,18 @@ function resolveCombat(isFighting) {
     }
 }
 
-// v1.9.2 Updated Bust Logic
 function bustPlayer() {
     state.day += 2;
     state.health = 100;
     
-    // Take 50% of current cash as a fine
     const lostCash = Math.floor(state.wallet / 2);
     state.wallet -= lostCash;
     
-    // Empty pockets
     for (let item in state.inventory) {
         state.inventory[item].qty = 0;
         state.inventory[item].avgCost = 0;
     }
 
-    // Anti-Softlock: The Boot Stash
     let stashMessage = "";
     if (state.wallet < 50 && state.bank === 0) {
         state.wallet = 50;
@@ -239,12 +235,13 @@ function triggerRandomEvents() {
             updateUI();
             break;
         case 'H':
+            // v1.9.3 Fix: Ensure it rounds down and always leaves at least 1 item
             const spoilableItems = ownedItems.filter(item => state.inventory[item].qty > 1);
             if (spoilableItems.length > 0) {
                 const spoiledItem = spoilableItems[Math.floor(Math.random() * spoilableItems.length)];
-                const lostQty = Math.ceil(state.inventory[spoiledItem].qty * 0.75);
+                const lostQty = Math.max(1, Math.floor(state.inventory[spoiledItem].qty * 0.75));
                 state.inventory[spoiledItem].qty -= lostQty;
-                showModal("Spoiled!", `Your stash of ${spoiledItem} wasn't sealed properly and went bad! You had to vanish ${lostQty} of them, but managed to save the rest.`);
+                showModal("Fakes!", `You discover that ${lostQty} of the ${spoiledItem} you bought were fakes and have to toss them. You'd be angry if it wasn't the exact thing you'd do too.`);
                 updateUI();
             }
             break;
@@ -484,3 +481,4 @@ function updateUI() {
         }
     });
 }
+
