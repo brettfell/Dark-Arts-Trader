@@ -1,11 +1,17 @@
-const CACHE_NAME = 'mundungus-v1';
+const CACHE_NAME = 'mundungus-v2.1';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
     '/style.css',
     '/app.js',
-    '/manifest.json'
-    // Add '/theme.mp3', '/icon-192.png', '/icon-512.png' once you have them
+    '/manifest.json',
+    '/icon.png',
+    '/Knockturn.jpeg',
+    '/Diagon.jpg',
+    '/HogsHead.jpg',
+    '/Forest.jpg',
+    '/GodricksHollow.jpg',
+    '/Azkaban.jpg'
 ];
 
 self.addEventListener('install', event => {
@@ -21,3 +27,19 @@ self.addEventListener('fetch', event => {
         .then(response => response || fetch(event.request))
     );
 });
+
+// Forces the browser to delete old caches when the version number updates
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cache => {
+                    if (cache !== CACHE_NAME) {
+                        return caches.delete(cache);
+                    }
+                })
+            );
+        })
+    );
+});
+
