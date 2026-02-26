@@ -1,5 +1,5 @@
-// Game State v1.9.3
-let state = {
+// Default Game State Template
+const defaultState = {
     day: 1,
     maxDays: 30,
     health: 100,
@@ -19,6 +19,9 @@ let state = {
     maxSpace: 50,
     currentLocation: 'Knockturn Alley' 
 };
+
+// Deep clone the default state to start
+let state = JSON.parse(JSON.stringify(defaultState));
 
 const items = {
     'Polyjuice Potion': { min: 10, max: 30 },
@@ -42,6 +45,7 @@ const locations = ['Diagon Alley', 'Knockturn Alley', 'Hogsmeade', 'Forbidden Fo
 const titleScreen = document.getElementById('title-screen');
 const gameScreen = document.getElementById('game-screen');
 const startBtn = document.getElementById('start-btn');
+const continueBtn = document.getElementById('continue-btn');
 const themeMusic = document.getElementById('theme-music');
 const modal = document.getElementById('custom-modal');
 const modalTitle = document.getElementById('modal-title');
@@ -49,6 +53,64 @@ const modalMessage = document.getElementById('modal-message');
 const modalButtons = document.getElementById('modal-buttons');
 
 document.body.classList.add('bg-title');
+
+// --- SAVE & LOAD LOGIC ---
+function saveGame() {
+    const saveData = {
+        gameState: state,
+        gamePrices: currentPrices
+    };
+    localStorage.setItem('mundungusSave', JSON.stringify(saveData));
+}
+
+// Check for existing save & high score on page load
+const savedHighScore = localStorage.getItem('mundungusHighScore');
+if (savedHighScore) {
+    const hsDisplay = document.getElementById('high-score-display');
+    hsDisplay.innerText = `Highest Stash: ${savedHighScore}g`;
+    hsDisplay.style.display = 'block';
+}
+
+const savedGame = localStorage.getItem('mundungusSave');
+if (savedGame) {
+    continueBtn.style.display = 'inline-block';
+}
+
+continueBtn.addEventListener('click', () => {
+    try {
+        const loadedData = JSON.parse(localStorage.getItem('mundungusSave'));
+        state = loadedData.gameState;
+        currentPrices = loadedData.gamePrices;
+        startGame(false); // false = don't trigger day 1 random events
+    } catch(e) {
+        showModal("Error", "Save file corrupted. Starting new game.");
+        state = JSON.parse(JSON.stringify(defaultState));
+        generatePrices();
+        startGame(true);
+    }
+});
+
+startBtn.addEventListener('click', () => {
+    // Overwrite with fresh state for new game
+    state = JSON.parse(JSON.stringify(defaultState));
+    generatePrices();
+    startGame(true); // true = trigger day 1 events
+});
+
+function startGame(isNewGame) {
+    titleScreen.classList.remove('active');
+    titleScreen.style.display = 'none'; 
+    gameScreen.classList.add('active'); 
+    gameScreen.style.display = 'block'; 
+    themeMusic.play().catch(e => console.log("Audio playback prevented"));
+    
+    if (isNewGame && Math.random() < 0.30) {
+        triggerRandomEvents();
+    }
+    
+    updateUI();
+}
+// -------------------------
 
 function showModal(title, message, buttons = [{text: 'OK', action: null}]) {
     modalTitle.innerText = title;
@@ -67,21 +129,6 @@ function showModal(title, message, buttons = [{text: 'OK', action: null}]) {
 
     modal.style.display = 'block';
 }
-
-startBtn.addEventListener('click', () => {
-    titleScreen.classList.remove('active');
-    titleScreen.style.display = 'none'; 
-    gameScreen.classList.add('active'); 
-    gameScreen.style.display = 'block'; 
-    themeMusic.play().catch(e => console.log("Audio playback prevented"));
-    generatePrices();
-    
-    if (Math.random() < 0.30) {
-        triggerRandomEvents();
-    }
-    
-    updateUI();
-});
 
 function generatePrices() {
     for (let item in items) {
@@ -235,7 +282,6 @@ function triggerRandomEvents() {
             updateUI();
             break;
         case 'H':
-            // v1.9.3 Fix: Ensure it rounds down and always leaves at least 1 item
             const spoilableItems = ownedItems.filter(item => state.inventory[item].qty > 1);
             if (spoilableItems.length > 0) {
                 const spoiledItem = spoilableItems[Math.floor(Math.random() * spoilableItems.length)];
@@ -279,6 +325,9 @@ function travel(newLocation) {
 }
 
 function endGame() {
+    // Delete the save file when the game naturally ends
+    localStorage.removeItem('mundungusSave');
+
     const gameScreen = document.getElementById('game-screen');
     gameScreen.classList.remove('active');
     gameScreen.style.display = 'none';
@@ -287,6 +336,7 @@ function endGame() {
     const endTitle = document.getElementById('end-title');
     const endMessage = document.getElementById('end-message');
     const finalScore = document.getElementById('final-score');
+    const endHighScore = document.getElementById('end-high-score');
     
     endScreen.classList.add('active');
     endScreen.style.display = 'block';
@@ -296,14 +346,29 @@ function endGame() {
     if (state.debt === 0) {
         document.body.classList.add('bg-win'); 
         const totalWealth = state.wallet + state.bank;
+        
+        // High Score Logic
+        let record = parseInt(localStorage.getItem('mundungusHighScore')) || 0;
+        let recordMsg = "";
+        if (totalWealth > record) {
+            localStorage.setItem('mundungusHighScore', totalWealth);
+            record = totalWealth;
+            recordMsg = "\n\nMERLIN's BEARD! THAT'S A NEW RECORD STASH!";
+        }
+
         endTitle.innerText = "You Survived!";
-        endMessage.innerText = "You successfully paid off Borgin and kept yourself out of Azkaban. Time to lay low in the Hog's Head for a while.";
+        endMessage.innerText = `You successfully paid off Borgin and kept yourself out of Azkaban. Time to lay low in the Hog's Head for a while.${recordMsg}`;
         finalScore.innerText = `Final Score: ${totalWealth}g`;
+        
+        endHighScore.innerText = `All-Time Highest Stash: ${record}g`;
+        endHighScore.style.display = 'block';
+
     } else {
         document.body.classList.add('bg-azkaban'); 
         endTitle.innerText = "Busted!";
         endMessage.innerText = `You failed to pay off your debt. Borgin tipped off the Ministry Aurors, handing them the fake fang. You were dragged to Azkaban owing ${state.debt}g.`;
         finalScore.innerText = "Final Score: Dementor's Kiss";
+        endHighScore.style.display = 'none';
     }
 }
 
@@ -480,5 +545,7 @@ function updateUI() {
             locationsList.innerHTML += `<button onclick="travel(\`${loc}\`)">${loc}</button>`;
         }
     });
-}
 
+    // Auto-Save the game at the end of every UI update
+    saveGame();
+}
