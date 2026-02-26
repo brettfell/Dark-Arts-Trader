@@ -1,5 +1,4 @@
-
-// Game State v1.9
+// Game State v1.9.2
 let state = {
     day: 1,
     maxDays: 30,
@@ -49,7 +48,6 @@ const modalTitle = document.getElementById('modal-title');
 const modalMessage = document.getElementById('modal-message');
 const modalButtons = document.getElementById('modal-buttons');
 
-// Set the title screen background on load
 document.body.classList.add('bg-title');
 
 function showModal(title, message, buttons = [{text: 'OK', action: null}]) {
@@ -146,21 +144,32 @@ function resolveCombat(isFighting) {
     }
 }
 
+// v1.9.2 Updated Bust Logic
 function bustPlayer() {
     state.day += 2;
     state.health = 100;
-    const lostCash = state.wallet;
-    state.wallet = 0;
     
+    // Take 50% of current cash as a fine
+    const lostCash = Math.floor(state.wallet / 2);
+    state.wallet -= lostCash;
+    
+    // Empty pockets
     for (let item in state.inventory) {
         state.inventory[item].qty = 0;
         state.inventory[item].avgCost = 0;
     }
 
+    // Anti-Softlock: The Boot Stash
+    let stashMessage = "";
+    if (state.wallet < 50 && state.bank === 0) {
+        state.wallet = 50;
+        stashMessage = " Thankfully, they didn't check your left boot where you had a 50g emergency stash.";
+    }
+
     if (state.day >= state.maxDays) {
         endGame();
     } else {
-        showModal("Busted!", `An Auror's stunning spell hit you directly. You spent 2 days in Ministry holding. They confiscated your ${lostCash}g and all your illicit goods, but let you go with a warning.`);
+        showModal("Busted!", `An Auror's stunning spell hit you directly. You spent 2 days in holding. They confiscated your illicit goods and fined you ${lostCash}g.${stashMessage}`);
         updateUI();
     }
 }
@@ -285,17 +294,16 @@ function endGame() {
     endScreen.classList.add('active');
     endScreen.style.display = 'block';
 
-    // Set Background based on Win/Loss
     document.body.className = ''; 
 
     if (state.debt === 0) {
-        document.body.classList.add('bg-win'); // Hog's Head Background
+        document.body.classList.add('bg-win'); 
         const totalWealth = state.wallet + state.bank;
         endTitle.innerText = "You Survived!";
         endMessage.innerText = "You successfully paid off Borgin and kept yourself out of Azkaban. Time to lay low in the Hog's Head for a while.";
         finalScore.innerText = `Final Score: ${totalWealth}g`;
     } else {
-        document.body.classList.add('bg-azkaban'); // Azkaban Background
+        document.body.classList.add('bg-azkaban'); 
         endTitle.innerText = "Busted!";
         endMessage.innerText = `You failed to pay off your debt. Borgin tipped off the Ministry Aurors, handing them the fake fang. You were dragged to Azkaban owing ${state.debt}g.`;
         finalScore.innerText = "Final Score: Dementor's Kiss";
@@ -396,7 +404,6 @@ function upgradeWand() {
 }
 
 function updateUI() {
-    // Dynamically Swap Background based on Location
     document.body.className = ''; 
     if (state.currentLocation === 'Diagon Alley') document.body.classList.add('bg-diagon');
     else if (state.currentLocation === 'Knockturn Alley') document.body.classList.add('bg-knockturn');
