@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,9 +11,12 @@
 
     <div id="title-screen" class="screen active">
         <h1>Mundungus' Debt</h1>
+        <h3 id="high-score-display" style="display: none; color: gold; text-shadow: 1px 1px 5px black;">Highest Stash: 0g</h3>
         <p>You sold Borgin a painted Acromantula pincer, swearing it was a genuine Basilisk fang. When his dangerous client discovered the fake, Borgin had to pay 5,000g to save his own skin.</p>
         <p>Now, Borgin is holding the forged fang. If you don't pay off the debt in 30 days, he's handing it to the Aurors as proof of you trafficking Class-A Non-Tradeable Goods—a guaranteed one-way ticket to Azkaban.</p>
-        <button id="start-btn">Sneak into Knockturn Alley (Start)</button>
+        
+        <button id="continue-btn" style="display: none; background-color: #1a472a; border-color: #2a623d;">Continue Saved Game</button>
+        <button id="start-btn">Sneak into Knockturn Alley (New Game)</button>
         <audio id="theme-music" src="theme.mp3" loop></audio> 
     </div>
 
@@ -62,6 +64,7 @@
         <div class="stats">
             <p id="end-message" style="font-size: 1.2em; text-align: center; width: 100%;"></p>
             <h2 id="final-score" style="text-align: center; width: 100%; color: var(--accent-color);"></h2>
+            <h3 id="end-high-score" style="text-align: center; width: 100%; color: gold; display: none;"></h3>
         </div>
         <div style="text-align: center; margin-top: 20px;">
             <button onclick="location.reload()">Play Again</button>
