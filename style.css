@@ -2,8 +2,6 @@
     --bg-color: #1a1a1a;
     --text-color: #e0d8c0;
     --accent-color: #740001; 
-    
-    /* Slightly darker transparency without the blur so text remains readable */
     --panel-bg: rgba(15, 15, 15, 0.85); 
 }
 
@@ -13,30 +11,40 @@ body {
     color: var(--text-color);
     margin: 0;
     padding: 10px;
-    
-    background-size: cover;
-    background-position: center center;
-    background-attachment: fixed;
-    transition: background-image 0.5s ease-in-out; 
-    
-    /* Stronger shadow to guarantee text pops against bright backgrounds */
+    min-height: 100vh;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
 }
 
-/* Dynamic Background Classes */
-body.bg-title { background-image: url('Knockturn.jpeg'); }
-body.bg-knockturn { background-image: url('Knockturn.jpeg'); }
-body.bg-diagon { background-image: url('Diagon.jpg'); }
-body.bg-hogsmeade { background-image: url('HogsHead.jpg'); }
-body.bg-forest { background-image: url('Forest.jpg'); }
-body.bg-godrics { background-image: url('GodricksHollow.jpg'); }
-body.bg-azkaban { background-image: url('Azkaban.jpg'); }
-body.bg-win { background-image: url('HogsHead.jpg'); }
+/* THE PORTRAIT BACKGROUND FIX */
+/* This creates a fixed layer behind the game that flawlessly fits the screen without the mobile zoom bug */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-size: cover;
+    background-position: center center;
+    transition: background-image 0.5s ease-in-out;
+}
+
+/* Dynamic Background Classes now apply to the new fixed layer */
+body.bg-title::before { background-image: url('Knockturn.jpeg'); }
+body.bg-knockturn::before { background-image: url('Knockturn.jpeg'); }
+body.bg-diagon::before { background-image: url('Diagon.jpg'); }
+body.bg-hogsmeade::before { background-image: url('HogsHead.jpg'); }
+body.bg-forest::before { background-image: url('Forest.jpg'); }
+body.bg-godrics::before { background-image: url('GodricksHollow.jpg'); }
+body.bg-azkaban::before { background-image: url('Azkaban.jpg'); }
+body.bg-win::before { background-image: url('HogsHead.jpg'); }
 
 .screen {
     display: none;
     max-width: 600px;
     margin: 0 auto;
+    padding-bottom: 30px; /* Gives a little breathing room at the bottom of the app */
 }
 
 .screen.active {
@@ -70,8 +78,6 @@ button:hover {
     background-color: #5a0000;
 }
 
-/* -- THE BOX FIX -- */
-/* Forces the Header (Title + Stats) into one unified dark box */
 header {
     margin-top: 10px;
     background: var(--panel-bg);
@@ -89,7 +95,6 @@ header h2 {
     font-size: 1.4em;
 }
 
-/* Strips background from stats so it sits cleanly inside the header box */
 .stats {
     display: flex;
     justify-content: space-between;
@@ -103,7 +108,6 @@ header h2 {
     font-weight: bold;
 }
 
-/* Panels */
 .market-panel, .inventory-panel, .actions, .financials-panel, #location-actions-panel {
     margin-top: 20px;
     background: var(--panel-bg);
@@ -135,6 +139,7 @@ input[type="number"] {
     font-weight: bold;
     color: #000;
     text-shadow: none; 
+    width: 50px; /* Slightly wider to accommodate larger quantities */
 }
 
 /* Custom Modal Styles */
@@ -149,9 +154,20 @@ input[type="number"] {
     background-color: rgba(0, 0, 0, 0.90);
 }
 
+/* THE MODAL LANDSCAPE FIX */
 .modal-content {
     background-color: #222;
-    margin: 40% auto;
+    
+    /* Perfect absolute centering */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    /* Scroll protection */
+    max-height: 85vh; 
+    overflow-y: auto; 
+
     padding: 20px;
     border: 2px solid var(--accent-color);
     width: 85%;
@@ -170,5 +186,6 @@ input[type="number"] {
     margin-top: 20px;
     display: flex;
     justify-content: center;
+    flex-wrap: wrap; /* Allows buttons to wrap if screen is very narrow */
     gap: 10px;
 }
